@@ -38,8 +38,9 @@ import time
 import ConfigParser #safe application configuration
 import webbrowser #open browser from python
 
-from obd2_codes import pcodes
-from obd2_codes import ptest
+import obd2_codes
+#from obd2_codes import pcodes
+#from obd2_codes import ptest
 
 from wx.lib.mixins.listctrl import ListCtrlAutoWidthMixin
 
@@ -200,7 +201,7 @@ class MyApp(wx.App):
                     if len(DTCCodes)==0:
                       wx.PostEvent(self._notify_window, DTCEvent(["","","No DTC codes (codes cleared)"]))
                     for i in range (0,len(DTCCodes)):
-                      wx.PostEvent(self._notify_window, DTCEvent([DTCCodes[i][1],DTCCodes[i][0],pcodes[DTCCodes[i][1]]]))   
+                      wx.PostEvent(self._notify_window, DTCEvent([DTCCodes[i][1],DTCCodes[i][0],obd2_codes.pcodes[DTCCodes[i][1]]]))   
                 else:
                  pass 
             self.stop()
@@ -391,8 +392,8 @@ class MyApp(wx.App):
         self.OBDTests.InsertColumn(1, "Value")
         self.nb.AddPage(self.OBDTests, "Tests")
                 
-        for i in range(0,len(ptest)): #fill MODE 1 PID 1 test description 
-          self.OBDTests.Append([ptest[i],"---"]);
+        for i in range(0,len(obd2_codes.ptest)): #fill MODE 1 PID 1 test description 
+          self.OBDTests.Append([obd2_codes.ptest[i],"---"]);
         
         self.build_sensor_page()
 
@@ -550,26 +551,25 @@ the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  0211
 
         root = tree.AddRoot("Code Reference")
         proot = tree.AppendItem(root,"Powertrain (P) Codes")
-        codes = obd_io.pcodes.keys()
+        codes = obd2_codes.pcodes.keys() #obd_io.pcodes.keys()
         codes.sort()
         group = ""
         for c in codes:
             if c[:3] != group:
-                group_root = tree.AppendItem(proot, c[:3]+"XX")
+                group_root = tree.AppendItem(proot, c[:3]+"XX: "+obd2_codes.pcode_classes[c[:3]+"XX"])
                 group = c[:3]
-            leaf = tree.AppendItem(group_root, c)
-            tree.AppendItem(leaf, obd_io.pcodes[c]) 
+            leaf = tree.AppendItem(group_root, c+": "+obd2_codes.pcodes[c])
 
         uroot = tree.AppendItem(root,"Network (U) Codes")
-        codes = obd_io.ucodes.keys()
+        codes = obd2_codes.ucodes.keys()
         codes.sort()
         group = ""
         for c in codes:
             if c[:3] != group:
                 group_root = tree.AppendItem(uroot, c[:3]+"XX")
                 group = c[:3]
-            leaf = tree.AppendItem(group_root, c)
-            tree.AppendItem(leaf, obd_io.ucodes[c]) 
+            leaf = tree.AppendItem(group_root, c+": "+obd2_codes.ucodes[c])
+            #tree.AppendItem(leaf, obd2_codes.ucodes[c]) 
 
         diag.SetSize((400,500))
         diag.Show(True)
